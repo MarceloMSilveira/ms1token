@@ -1,12 +1,18 @@
 import React, { useState } from "react";
+import { Principal } from "@dfinity/principal";
+import { ms1token_backend } from "../../../declarations/ms1token_backend";
 
 function Balance() {
   
   const [inputValue, setInput] = useState('');
+  const [balanceResult, setBalanceResult] = useState('');
 
   async function handleClick() {
-    console.log(inputValue);
-
+    //console.log(inputValue);
+    const principal = Principal.fromText(inputValue);
+    const balance = await ms1token_backend.balanceOf(principal);
+    console.log(balance.toLocaleString());
+    setBalanceResult(balance.toLocaleString());
   }
 
 
@@ -30,7 +36,7 @@ function Balance() {
           Check Balance
         </button>
       </p>
-      <p>This account has a balance of XYZ.</p>
+      <p>This account has a balance of ${balanceResult}.</p>
     </div>
   );
 }
