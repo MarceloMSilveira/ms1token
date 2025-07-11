@@ -1,5 +1,6 @@
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
+import Text "mo:base/Text";
 
 
 actor Token {
@@ -18,4 +19,8 @@ actor Token {
     };
     return balance;
   };
+
+  public query func getSymbol() : async Text {
+    return symbol;
+  }
 }

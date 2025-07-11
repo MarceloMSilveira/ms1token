@@ -6,13 +6,23 @@ function Balance() {
   
   const [inputValue, setInput] = useState('');
   const [balanceResult, setBalanceResult] = useState('');
+  const [symbol, setSymbol] = useState('');
+  const [isHidden, setHidden] = useState(true);
 
   async function handleClick() {
     //console.log(inputValue);
-    const principal = Principal.fromText(inputValue);
-    const balance = await ms1token_backend.balanceOf(principal);
-    console.log(balance.toLocaleString());
-    setBalanceResult(balance.toLocaleString());
+    let balance;
+    try {
+      const principal = Principal.fromText(inputValue);
+      balance = await ms1token_backend.balanceOf(principal);  
+      console.log(balance.toLocaleString());
+      setBalanceResult(balance.toLocaleString());
+      setSymbol(await ms1token_backend.getSymbol());
+      setHidden(false);
+    } catch (error) {
+      balance = 0;
+      setHidden(true);
+    }
   }
 
 
@@ -36,7 +46,7 @@ function Balance() {
           Check Balance
         </button>
       </p>
-      <p>This account has a balance of ${balanceResult}.</p>
+      <p hidden={isHidden}>This account has a balance of {balanceResult} {symbol}.</p>
     </div>
   );
 }
