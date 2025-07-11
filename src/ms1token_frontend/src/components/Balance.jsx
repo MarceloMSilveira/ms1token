@@ -20,7 +20,7 @@ function Balance() {
       setSymbol(await ms1token_backend.getSymbol());
       setHidden(false);
     } catch (error) {
-      balance = 0;
+      balance = "";
       setHidden(true);
     }
   }
