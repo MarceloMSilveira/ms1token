@@ -2,16 +2,23 @@ import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
+import Iter "mo:base/Iter";
 
 
 actor Token {
   
-  var owner : Principal = Principal.fromText("hyahk-s5x3i-vpuhz-wvxeb-jo5t6-apalf-dbgno-ni6xw-54fil-jzuit-oae");
-  var totalSupply : Nat = 1000000000;
-  var symbol : Text = "DM$1"; //$ms1 coin descentralized
+  let owner : Principal = Principal.fromText("hyahk-s5x3i-vpuhz-wvxeb-jo5t6-apalf-dbgno-ni6xw-54fil-jzuit-oae");
+  let totalSupply : Nat = 1000000000;
+  let symbol : Text = "DM$1"; //$ms1 coin descentralized
 
-  var balances = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
-  balances.put(owner, totalSupply);
+  private stable var balanceEntries: [(Principal, Nat)] = [];
+
+  private var balances = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
+  if (balances.size() < 1) {
+      balances.put(owner, totalSupply);
+    };
+
+  //Debug.print("test");
 
   public query func balanceOf (who : Principal) : async Nat {
     let balance : Nat = switch(balances.get(who)) {
@@ -29,10 +36,10 @@ actor Token {
     Debug.print(debug_show(msg.caller));
     if (balances.get(msg.caller) == null) {
       let amount = 10000;
-      balances.put(msg.caller,amount);
-       return "Success";
+      let result = await transfer(msg.caller,amount);
+      return result;
     } else {
-      return "Already Claimed!";
+      return "Already Claimed";
     };
   };
 
@@ -52,4 +59,15 @@ actor Token {
        return "Insufficient Funds";
      }
   };
-}
+
+  system func preupgrade() {
+    balanceEntries := Iter.toArray(balances.entries()); // Save state before upgrade
+  };
+
+  system func postupgrade() {
+    balances := HashMap.fromIter(balanceEntries.vals(), 1, Principal.equal, Principal.hash ); // restore balances hashmap after upgrade
+    if (balances.size() < 1) {
+      balances.put(owner, totalSupply);
+    };
+  };
+};
